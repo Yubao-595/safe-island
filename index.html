@@ -544,11 +544,11 @@
     .enter .cn { font-size: 14px; letter-spacing: 0.28em; gap: 12px; color: rgba(255,255,255,0.95); }
     .enter .arrow { font-size: 17px; }
 
-    /* mobile player: ~72vw, centered toward right, ~74px tall */
+    /* mobile player: ~72vw, centered, ~74px tall — permanently visible */
     .player {
       left: 50%;
       right: auto;
-      margin-left: -36vw;
+      margin-left: 0;
       bottom: calc(var(--safe-bottom) + 32px);
       width: 72vw;
       max-width: 360px;
@@ -560,8 +560,8 @@
       animation: playerFloatMobile 9s ease-in-out infinite;
     }
     @keyframes playerFloatMobile {
-      0%, 100% { transform: translateY(0); }
-      50%      { transform: translateY(-4px); }
+      0%, 100% { transform: translate(-50%, 0); }
+      50%      { transform: translate(-50%, -4px); }
     }
     .player .title-en { font-size: 12px; letter-spacing: 0.22em; color: rgba(255,255,255,0.95); }
     .player .status { font-size: 10px; letter-spacing: 0.28em; color: rgba(255,255,255,0.65); }
@@ -828,20 +828,28 @@ scene.add(ground);
    Portrait composition: curve sweeps across the frame.
    ============================================================ */
 
+/* ============================================================
+   Stream — natural forest creek
+   Wider, softer, translucent. Curve smoothed; bank is feathered.
+   ============================================================ */
 const streamCurve = new THREE.CatmullRomCurve3([
-  new THREE.Vector3(-20,  0.02, -34),  // far back-left
-  new THREE.Vector3(-14,  0.02, -24),
-  new THREE.Vector3( -8,  0.02, -16),
-  new THREE.Vector3( -2,  0.02, -10),  // arc through middle distance
-  new THREE.Vector3(  4,  0.02,  -5),
-  new THREE.Vector3( 10,  0.02,  -1),
-  new THREE.Vector3( 16,  0.02,   4),  // exits mid-right / lower-right
-  new THREE.Vector3( 24,  0.02,   8),
-  new THREE.Vector3( 34,  0.02,  12),
-], false, 'catmullrom', 0.5);
+  new THREE.Vector3(-22,  0.02, -36),
+  new THREE.Vector3(-17,  0.02, -28),
+  new THREE.Vector3(-12,  0.02, -20),
+  new THREE.Vector3( -7,  0.02, -13),
+  new THREE.Vector3( -2,  0.02,  -8),
+  new THREE.Vector3(  3,  0.02,  -4),
+  new THREE.Vector3(  9,  0.02,  -1),
+  new THREE.Vector3( 15,  0.02,   3),
+  new THREE.Vector3( 22,  0.02,   7),
+  new THREE.Vector3( 30,  0.02,  11),
+  new THREE.Vector3( 38,  0.02,  15),
+], false, 'catmullrom', 0.35);  // lower tension → smoother arcs, no sharp bends
 
-const curveSamples = streamCurve.getPoints(240);
+const curveSamples = streamCurve.getPoints(320);
 
+/* Ribbon builder — uses world-space coords directly so shaders can
+   read true X/Z for flow. Width may vary along t. */
 function buildRibbon(curve, segments, widthFn, yFn) {
   const positions = [];
   const uvs = [];
@@ -857,7 +865,7 @@ function buildRibbon(curve, segments, widthFn, yFn) {
     const right = p.clone().addScaledVector(perp, -w * 0.5);
     left.y = right.y = y;
     positions.push(left.x, left.y, left.z, right.x, right.y, right.z);
-    uvs.push(0, t * 14, 1, t * 14);
+    uvs.push(0, t * 12, 1, t * 12);
   }
   for (let i = 0; i < segments; i++) {
     const a = i * 2, b = a + 1, c = a + 2, d = a + 3;
@@ -871,7 +879,6 @@ function buildRibbon(curve, segments, widthFn, yFn) {
   return g;
 }
 
-// Distance helper used for grass / tree placement
 function distToStream(x, z) {
   let min = Infinity;
   for (let i = 0; i < curveSamples.length - 1; i++) {
@@ -888,51 +895,71 @@ function distToStream(x, z) {
   return Math.sqrt(min);
 }
 
-// Narrow soft earth bank — just a hint, not a wide yellow strip
-const bankGeo = buildRibbon(streamCurve, 240,
-  t => 2.0 + Math.sin(t * 23.0) * 0.18,
-  () => 0.012);
+/* ---- Width functions (organic, low frequency) ---- */
+function streamW(t) {
+  // base 3.4 widening to ~4.2 mid-arcs, plus smooth low-freq variation
+  return 3.4
+    + Math.sin(t * 5.1) * 0.45
+    + Math.sin(t * 11.2 + 1.3) * 0.22;
+}
+
+/* ---- LAYER 1: outer earth bank (very soft, narrow halo of damp soil) ---- */
+const bankGeo = buildRibbon(streamCurve, 320,
+  t => streamW(t) + 1.8 + Math.sin(t * 13.0) * 0.4,
+  () => 0.010);
 const bankMat = new THREE.MeshStandardMaterial({
-  color: 0x6f5a3a,  // soft warm earth, low saturation
+  color: 0x6b5836,
   roughness: 1, metalness: 0,
 });
 const bankMesh = new THREE.Mesh(bankGeo, bankMat);
 scene.add(bankMesh);
 
-// Mossy / wet-grass edge — green ribbon right next to water so grass meets water naturally
-const mossGeo = buildRibbon(streamCurve, 240,
-  t => 1.55 + Math.sin(t * 27.0) * 0.12,
-  () => 0.022);
+/* ---- LAYER 2: mossy wet-grass edge (greener strip hugging water) ---- */
+const mossGeo = buildRibbon(streamCurve, 320,
+  t => streamW(t) + 0.7 + Math.sin(t * 17.0) * 0.25,
+  () => 0.020);
 const mossMat = new THREE.MeshStandardMaterial({
-  color: 0x4f7a32, roughness: 1,
+  color: 0x4e7a30, roughness: 1,
 });
 const mossMesh = new THREE.Mesh(mossGeo, mossMat);
 scene.add(mossMesh);
 
-// Water — calm pale blue-green creek
+/* ---- LAYER 3: shallow underwater sand bed (light tan, slightly above bed) ---- */
+const bedGeo = buildRibbon(streamCurve, 320,
+  t => streamW(t) - 0.15,
+  () => 0.030);
+const bedMat = new THREE.MeshStandardMaterial({
+  color: 0xb8a87e, roughness: 1, metalness: 0,
+});
+const bedMesh = new THREE.Mesh(bedGeo, bedMat);
+scene.add(bedMesh);
+
+/* ---- LAYER 4: water surface — translucent, flowing, soft edges ---- */
 const waterUniforms = {
-  uTime:   { value: 0 },
-  uShallow:{ value: new THREE.Color(0xaed9d0) }, // pale blue-green
-  uDeep:   { value: new THREE.Color(0x4a7d6e) },
-  uSky:    { value: new THREE.Color(0xc6e2e6) },
-  uSun:    { value: new THREE.Color(0xfff2c8) },
+  uTime:    { value: 0 },
+  uShallow: { value: new THREE.Color(0xd4ece4) }, // very pale aqua at edges
+  uMid:     { value: new THREE.Color(0x9ccab8) }, // soft sage middle
+  uDeep:    { value: new THREE.Color(0x4f7a6d) }, // deeper at center
+  uSky:     { value: new THREE.Color(0xd6e9ee) },
+  uSun:     { value: new THREE.Color(0xfff0cc) },
 };
 const waterMat = new THREE.ShaderMaterial({
   uniforms: waterUniforms,
   transparent: true,
+  depthWrite: false,
   vertexShader: `
     uniform float uTime;
-    varying vec2 vUv;
-    varying vec3 vPosW;
+    varying vec2  vUv;
+    varying vec3  vPosW;
     varying float vRipple;
     void main() {
       vUv = uv;
       vec3 p = position;
       // very gentle ripples — slow & low amplitude
       float r =
-          sin(p.x * 0.55 + uTime * 0.18) * 0.010
-        + cos(p.z * 0.72 - uTime * 0.14) * 0.008
-        + sin((p.x + p.z) * 0.35 + uTime * 0.11) * 0.006;
+          sin(p.x * 0.45 + uTime * 0.16) * 0.012
+        + cos(p.z * 0.55 - uTime * 0.13) * 0.010
+        + sin((p.x + p.z) * 0.30 + uTime * 0.09) * 0.007;
       p.y += r;
       vRipple = r;
       vec4 wp = modelMatrix * vec4(p, 1.0);
@@ -941,16 +968,16 @@ const waterMat = new THREE.ShaderMaterial({
     }
   `,
   fragmentShader: `
-    varying vec2 vUv;
-    varying vec3 vPosW;
+    varying vec2  vUv;
+    varying vec3  vPosW;
     varying float vRipple;
     uniform float uTime;
     uniform vec3 uShallow;
+    uniform vec3 uMid;
     uniform vec3 uDeep;
     uniform vec3 uSky;
     uniform vec3 uSun;
 
-    // value noise
     float hash(vec2 p){ return fract(sin(dot(p, vec2(127.1, 311.7))) * 43758.5453); }
     float noise(vec2 p){
       vec2 i = floor(p); vec2 f = fract(p);
@@ -961,34 +988,58 @@ const waterMat = new THREE.ShaderMaterial({
       vec2 u = f * f * (3.0 - 2.0 * f);
       return mix(a, b, u.x) + (c - a) * u.y * (1.0 - u.x) + (d - b) * u.x * u.y;
     }
+    float fbm(vec2 p){
+      float v = 0.0; float a = 0.5;
+      for (int i = 0; i < 4; i++) {
+        v += a * noise(p);
+        p *= 2.0; a *= 0.5;
+      }
+      return v;
+    }
 
     void main() {
-      // base: blend deep ↔ shallow using v across the ribbon (edges shallower)
-      float depthMix = smoothstep(0.0, 0.5, vUv.x) * smoothstep(1.0, 0.5, vUv.x);
-      vec3 base = mix(uShallow, uDeep, depthMix * 0.65);
+      // Cross-section "depth": 0 at edges, 1 at center
+      float center = 1.0 - abs(vUv.x - 0.5) * 2.0;
+      float depth  = smoothstep(0.0, 1.0, center);
 
-      // slow flowing noise to add gentle variation (NOT bright highlights)
-      vec2 flowUV = vec2(vPosW.x * 0.16 + uTime * 0.025,
-                         vPosW.z * 0.16 + uTime * 0.020);
-      float n = noise(flowUV) * 0.55 + noise(flowUV * 2.0) * 0.25;
-      base = mix(base, uSky, n * 0.16);
+      // 3-stop depth gradient: shallow → mid → deep
+      vec3 base = mix(uShallow, uMid, smoothstep(0.0, 0.5, depth));
+      base      = mix(base, uDeep, smoothstep(0.5, 1.0, depth) * 0.85);
 
-      // ripple — very subtle warm tint, no bright glow
-      base += vRipple * 1.4 * uSun * 0.22;
+      // Flowing UV — water moves along the ribbon (down the v-axis)
+      vec2 flowUV1 = vec2(vPosW.x * 0.18, vPosW.z * 0.18 - uTime * 0.06);
+      vec2 flowUV2 = vec2(vPosW.x * 0.45 + uTime * 0.04,
+                          vPosW.z * 0.45 - uTime * 0.10);
+      float n1 = fbm(flowUV1);
+      float n2 = fbm(flowUV2);
 
-      // edge fade to soft transition with bank
-      float edge = smoothstep(0.0, 0.22, vUv.x) * smoothstep(1.0, 0.78, vUv.x);
-      base *= 0.82 + edge * 0.18;
+      // Mix in sky reflection on top of base — stronger on shallow zone
+      float skyMix = (0.30 + 0.25 * n1) * (0.45 + 0.55 * (1.0 - depth));
+      base = mix(base, uSky, skyMix * 0.55);
 
-      gl_FragColor = vec4(base, 0.92 * edge + 0.08);
+      // Subtle caustic shimmer (NOT bright sparkles)
+      float caustic = pow(n2, 2.2) * 0.45;
+      base += caustic * uSun * 0.18;
+
+      // Tiny ripple highlight — barely perceptible
+      base += vRipple * uSun * 0.5;
+
+      // Edge feathering — soft transition to bank
+      float edgeFade = smoothstep(0.0, 0.30, vUv.x) * smoothstep(1.0, 0.70, vUv.x);
+
+      // Translucency varies with depth: shallow ~ 0.55, deep ~ 0.88
+      float alpha = mix(0.55, 0.88, depth) * (0.55 + 0.45 * edgeFade);
+
+      gl_FragColor = vec4(base, alpha);
     }
   `,
 });
 
-const waterGeo = buildRibbon(streamCurve, 240,
-  t => 1.1 + Math.sin(t * 19.0) * 0.10,
-  () => 0.045);
+const waterGeo = buildRibbon(streamCurve, 320,
+  t => streamW(t),
+  () => 0.040);
 const water = new THREE.Mesh(waterGeo, waterMat);
+water.renderOrder = 1;
 scene.add(water);
 
 /* ---------- Pebbles (sparse, low contrast) ---------- */
@@ -996,18 +1047,21 @@ const pebbleGeo = new THREE.IcosahedronGeometry(0.10, 0);
 const pebbleMatA = new THREE.MeshStandardMaterial({ color: 0x9a8a70, roughness: 0.95 });
 const pebbleMatB = new THREE.MeshStandardMaterial({ color: 0x807055, roughness: 1 });
 
-const pebbleCount = isMobile ? 45 : 80;
+const pebbleCount = isMobile ? 70 : 120;
 for (let i = 0; i < pebbleCount; i++) {
   const t = 0.05 + Math.random() * 0.9;
   const p = streamCurve.getPointAt(t);
   const tan = streamCurve.getTangentAt(t).normalize();
   const perp = new THREE.Vector3(-tan.z, 0, tan.x);
   const side = Math.random() > 0.5 ? 1 : -1;
-  const offset = (0.7 + Math.random() * 0.55) * side;  // bank-line pebbles, no center floaters
+  // half-width of water at this t, plus a small bank offset
+  const halfW = streamW(t) * 0.5;
+  const fromCenter = halfW + 0.1 + Math.random() * 0.9;  // along bank, a hint outside the water
+  const offset = fromCenter * side;
   const m = new THREE.Mesh(pebbleGeo, Math.random() > 0.5 ? pebbleMatA : pebbleMatB);
   m.position.copy(p).addScaledVector(perp, offset);
   m.position.y = 0.04 + Math.random() * 0.06;
-  m.scale.setScalar(0.3 + Math.random() * 0.9);
+  m.scale.setScalar(0.35 + Math.random() * 1.0);
   m.rotation.set(Math.random() * Math.PI, Math.random() * Math.PI, Math.random() * Math.PI);
   scene.add(m);
 }
@@ -1074,7 +1128,7 @@ let placed = 0;
 for (let i = 0; i < GRASS_TARGET * 3 && placed < GRASS_TARGET; i++) {
   const x = (Math.random() - 0.5) * 90;
   const z = (Math.random() - 0.5) * 90 - 4;
-  if (distToStream(x, z) < 1.1) continue; // let grass meet the water edge
+  if (distToStream(x, z) < 2.4) continue; // outside the wider creek, grass meets bank softly
   dummy.position.set(x, 0, z);
   dummy.rotation.y = Math.random() * Math.PI;
   dummy.scale.setScalar(0.6 + Math.random() * 0.85);
@@ -1124,45 +1178,54 @@ function makeTree(x, z) {
    Goal: dense forest hug on left/right + a far layer behind,
    while keeping the stream corridor open. Not random scatter. */
 
-function tryAddTree(x, z, minStreamDist = 3.0, minCamDist = 9) {
+function tryAddTree(x, z, minStreamDist = 4.0, minCamDist = 9) {
   if (distToStream(x, z) < minStreamDist) return false;
   if (Math.sqrt(x * x + (z + 4) * (z + 4)) < minCamDist) return false;
   scene.add(makeTree(x, z));
   return true;
 }
 
-// LAYER A — close side bands, denser (the forest "wraps" the viewer)
-const NEAR_PER_SIDE = isMobile ? 22 : 38;
+// LAYER A — close side bands. Wraps the viewer.
+// Mobile: +40%, Desktop: -15% from previous.
+const NEAR_PER_SIDE = isMobile ? 31 : 32;
 for (let side = -1; side <= 1; side += 2) {
   let placed = 0, tries = 0;
   while (placed < NEAR_PER_SIDE && tries++ < NEAR_PER_SIDE * 6) {
-    const xBase = side * (7 + Math.random() * 18);   // 7..25 from center
-    const z = -8 - Math.random() * 28;               // mid-to-far
+    const xBase = side * (7 + Math.random() * 18);
+    const z = -8 - Math.random() * 28;
     const jitter = (Math.random() - 0.5) * 4;
-    if (tryAddTree(xBase + jitter, z, 3.2, 9)) placed++;
+    if (tryAddTree(xBase + jitter, z, 4.0, 9)) placed++;
   }
 }
 
-// LAYER B — far backdrop band: a denser row far behind the stream
-const FAR_COUNT = isMobile ? 28 : 46;
+// LAYER B — far backdrop band
+const FAR_COUNT = isMobile ? 39 : 39;
 for (let i = 0; i < FAR_COUNT; i++) {
   const x = (Math.random() - 0.5) * 140;
-  const z = -42 - Math.random() * 18;                // 42..60 back
-  // far trees can be closer to stream centerline (perspective compression)
-  if (distToStream(x, z) < 1.8) continue;
+  const z = -42 - Math.random() * 18;
+  if (distToStream(x, z) < 2.4) continue;
   const t = makeTree(x, z);
-  // slightly smaller + cooler tint for depth
   t.scale.multiplyScalar(0.85);
   scene.add(t);
 }
 
-// LAYER C — sparse foreground accents flanking the viewer
-const FRONT_COUNT = isMobile ? 8 : 14;
+// LAYER C — foreground accents flanking the viewer
+const FRONT_COUNT = isMobile ? 11 : 12;
 for (let i = 0; i < FRONT_COUNT; i++) {
   const side = Math.random() > 0.5 ? 1 : -1;
   const x = side * (14 + Math.random() * 22);
-  const z = 4 + Math.random() * 10;                  // in front of camera midline
-  tryAddTree(x, z, 3.2, 6);
+  const z = 4 + Math.random() * 10;
+  tryAddTree(x, z, 4.0, 6);
+}
+
+// LAYER D (mobile only) — extra trees ahead of the stream to hug horizon
+if (isMobile) {
+  for (let i = 0; i < 14; i++) {
+    const side = Math.random() > 0.5 ? 1 : -1;
+    const x = side * (10 + Math.random() * 16);
+    const z = -20 - Math.random() * 14;
+    tryAddTree(x, z, 4.0, 8);
+  }
 }
 
 function makeBush(x, z) {
@@ -1352,12 +1415,32 @@ rayPositions.forEach(rp => {
 /* ============================================================
    Audio — HTML5 nature loop (primary) + WebAudio noise (fallback)
    ============================================================ */
-/* Forest stream ambience — Pixabay free CDN (replaceable). Falls back to
-   WebAudio noise if blocked. */
-const BGM_URL = 'https://cdn.pixabay.com/audio/2022/03/15/audio_8cb749cba2.mp3';
+/* Replace ./forest-stream.mp3 with your own asset for guaranteed playback.
+   We try the local file first, then a CDN fallback. */
+const BGM_SOURCES = [
+  './forest-stream.mp3',
+  'https://cdn.pixabay.com/audio/2022/03/15/audio_8cb749cba2.mp3',
+];
 const bgm = document.getElementById('bgm');
-bgm.src = BGM_URL;
+bgm.crossOrigin = 'anonymous';
 bgm.volume = 0;
+
+let bgmSourceIdx = 0;
+let bgmLoadedOk = false;
+function setBgmSource(idx) {
+  bgmSourceIdx = idx;
+  bgm.src = BGM_SOURCES[idx];
+  bgm.load();
+}
+setBgmSource(0);
+
+bgm.addEventListener('canplay',  () => { bgmLoadedOk = true; });
+bgm.addEventListener('error', () => {
+  bgmLoadedOk = false;
+  if (bgmSourceIdx < BGM_SOURCES.length - 1) {
+    setBgmSource(bgmSourceIdx + 1);
+  }
+});
 
 let webAudioCtx = null;
 let webAudioMaster = null;
@@ -1792,7 +1875,7 @@ gsap.from('.fs',           { opacity: 0, y: -16, duration: 2.4, delay: 0.6, ease
 gsap.from('.mini-actions', { opacity: 0, x:  16, duration: 2.4, delay: 1.0, ease: 'power2.out' });
 gsap.from('.breathe',      { opacity: 0, x: -20, duration: 2.4, delay: 1.2, ease: 'power2.out' });
 gsap.from('.enter',        { opacity: 0, y:  20, duration: 2.4, delay: 1.4, ease: 'power2.out' });
-gsap.from('.player',       { opacity: 0, y:  20, duration: 2.4, delay: 1.6, ease: 'power2.out' });
+gsap.from('.player',       { opacity: 0, duration: 2.4, delay: 1.6, ease: 'power2.out' });
 
 /* ---------- Resize ---------- */
 function onResize() {
