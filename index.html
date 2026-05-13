@@ -304,37 +304,47 @@
   }
   .enter:hover .arrow { transform: translateX(6px); }
 
-  /* ---------- BOTTOM RIGHT — floating player ---------- */
+  /* ---------- Permanent bottom player — deep-green glass capsule ---------- */
   .player {
-    position: absolute;
-    right: 40px;
-    bottom: calc(var(--safe-bottom) + 36px);
+    position: fixed;
+    left: 50%;
+    transform: translateX(-50%);
+    bottom: calc(env(safe-area-inset-bottom, 0px) + 22px);
+    z-index: 99999;
     display: flex;
     align-items: center;
     gap: 16px;
     padding: 12px 14px 12px 20px;
-    background: rgba(255, 255, 255, 0.08);
+    background: rgba(18, 32, 18, 0.42);
     backdrop-filter: blur(28px) saturate(180%);
     -webkit-backdrop-filter: blur(28px) saturate(180%);
-    border: 1px solid rgba(255, 255, 255, 0.22);
+    border: 1px solid rgba(255, 255, 255, 0.18);
     border-radius: 999px;
-    box-shadow: 0 10px 40px rgba(30, 50, 30, 0.18);
+    box-shadow:
+      0 10px 40px rgba(0, 20, 10, 0.32),
+      inset 0 1px 0 rgba(255, 255, 255, 0.18);
     min-width: 290px;
-    max-width: min(360px, 70vw);
-    transition: opacity 1.4s ease;
+    max-width: min(380px, 86vw);
+    width: max-content;
+    /* float subtly without ever fading or hiding */
     animation: playerFloat 9s ease-in-out infinite;
+    will-change: transform;
+    pointer-events: auto;
+    opacity: 1 !important; /* defensive: never let any tween hide it */
+    visibility: visible !important;
+    color: rgba(255, 255, 255, 0.95);
   }
   @keyframes playerFloat {
-    0%, 100% { transform: translateY(0); }
-    50%      { transform: translateY(-4px); }
+    0%, 100% { transform: translate(-50%, 0); }
+    50%      { transform: translate(-50%, -4px); }
   }
   .player .note-icon {
     flex-shrink: 0;
     width: 22px; height: 22px;
-    stroke: var(--ink);
+    stroke: rgba(255, 255, 255, 0.95);
     fill: none;
     stroke-width: 1;
-    opacity: 0.85;
+    opacity: 0.92;
   }
   .player .meta {
     flex: 1;
@@ -346,9 +356,9 @@
   .player .title-en {
     font-family: var(--cn);
     font-weight: 300;
-    font-size: 11px;
-    letter-spacing: 0.28em;
-    color: var(--ink);
+    font-size: 12px;
+    letter-spacing: 0.26em;
+    color: rgba(255, 255, 255, 0.96);
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -357,22 +367,26 @@
     display: flex;
     align-items: center;
     gap: 8px;
-    font-family: 'Inter', sans-serif;
+    font-family: var(--cn);
     font-weight: 300;
-    font-size: 9px;
-    letter-spacing: 0.32em;
-    text-transform: uppercase;
-    color: var(--ink-faint);
+    font-size: 10px;
+    letter-spacing: 0.28em;
+    color: rgba(255, 255, 255, 0.62);
   }
   .player .status .dot {
-    width: 4px; height: 4px;
+    width: 5px; height: 5px;
     border-radius: 50%;
-    background: rgba(220, 245, 200, 0.85);
-    box-shadow: 0 0 8px rgba(220, 245, 200, 0.6);
+    background: rgba(220, 245, 200, 0.55);
+    box-shadow: 0 0 8px rgba(220, 245, 200, 0.4);
+    transition: background 0.6s ease, box-shadow 0.6s ease;
+  }
+  .player.playing .status .dot {
+    background: rgba(180, 235, 150, 1);
+    box-shadow: 0 0 10px rgba(180, 235, 150, 0.85);
     animation: dotPulse 2.6s ease-in-out infinite;
   }
   @keyframes dotPulse {
-    0%, 100% { opacity: 0.5; }
+    0%, 100% { opacity: 0.55; }
     50%      { opacity: 1; }
   }
 
@@ -381,16 +395,16 @@
     display: flex;
     align-items: center;
     gap: 3px;
-    height: 16px;
-    width: 28px;
+    height: 18px;
+    width: 30px;
     flex-shrink: 0;
-    opacity: 0.4;
+    opacity: 0.45;
     transition: opacity 1.2s ease;
   }
-  .player.playing .spectrum { opacity: 0.9; }
+  .player.playing .spectrum { opacity: 0.95; }
   .spectrum span {
     flex: 1;
-    background: var(--ink);
+    background: rgba(255, 255, 255, 0.95);
     border-radius: 1px;
     height: 35%;
   }
@@ -544,29 +558,20 @@
     .enter .cn { font-size: 14px; letter-spacing: 0.28em; gap: 12px; color: rgba(255,255,255,0.95); }
     .enter .arrow { font-size: 17px; }
 
-    /* mobile player: ~72vw, centered, ~74px tall — permanently visible */
+    /* mobile player: ~78vw cap, height auto, kept permanently visible */
     .player {
-      left: 50%;
-      right: auto;
-      margin-left: 0;
-      bottom: calc(var(--safe-bottom) + 32px);
-      width: 72vw;
-      max-width: 360px;
-      min-width: 260px;
-      height: 74px;
-      padding: 0 14px 0 18px;
-      gap: 13px;
-      border-color: rgba(255,255,255,0.32);
-      animation: playerFloatMobile 9s ease-in-out infinite;
+      bottom: calc(env(safe-area-inset-bottom, 0px) + 18px);
+      width: max-content;
+      min-width: 280px;
+      max-width: 86vw;
+      padding: 11px 12px 11px 18px;
+      gap: 12px;
+      border-color: rgba(255, 255, 255, 0.22);
     }
-    @keyframes playerFloatMobile {
-      0%, 100% { transform: translate(-50%, 0); }
-      50%      { transform: translate(-50%, -4px); }
-    }
-    .player .title-en { font-size: 12px; letter-spacing: 0.22em; color: rgba(255,255,255,0.95); }
-    .player .status { font-size: 10px; letter-spacing: 0.28em; color: rgba(255,255,255,0.65); }
-    .player .note-icon { width: 20px; height: 20px; opacity: 0.95; }
-    .spectrum { width: 24px; height: 15px; }
+    .player .title-en { font-size: 12px; letter-spacing: 0.22em; }
+    .player .status { font-size: 10px; letter-spacing: 0.24em; }
+    .player .note-icon { width: 20px; height: 20px; }
+    .spectrum { width: 26px; height: 16px; }
     .play-btn { width: 40px; height: 40px; border-color: rgba(255,255,255,0.6); }
     .play-btn svg { width: 12px; height: 12px; }
 
@@ -581,10 +586,13 @@
     .enter .cn { font-size: 13px; }
     .breathe { bottom: calc(var(--safe-bottom) + 230px); }
     .player {
-      width: 84vw;
-      height: 70px;
+      max-width: 92vw;
+      min-width: 260px;
+      padding: 10px 11px 10px 16px;
+      gap: 10px;
     }
     .player .title-en { font-size: 11px; }
+    .player .status { font-size: 9px; }
   }
 
   @media (max-height: 480px) and (orientation: landscape) {
@@ -598,7 +606,7 @@
 <body>
 <canvas id="scene"></canvas>
 
-<audio id="bgm" loop preload="auto" crossorigin="anonymous"></audio>
+<audio id="bgm" src="./forest-stream.mp3" loop preload="auto"></audio>
 
 <div id="ui">
 
@@ -650,26 +658,28 @@
     </div>
   </button>
 
-  <!-- BOTTOM RIGHT — floating player -->
-  <div class="player" id="player">
-    <svg class="note-icon" viewBox="0 0 24 24" aria-hidden="true">
-      <path d="M9 18 V6 L19 4 V16"
-            stroke-linecap="round" stroke-linejoin="round"/>
-      <circle cx="6.5" cy="18" r="2.5" stroke-linecap="round"/>
-      <circle cx="16.5" cy="16" r="2.5" stroke-linecap="round"/>
-    </svg>
-    <div class="meta">
-      <div class="title-en">森 林 小 溪 · 白 噪 音</div>
-      <div class="status"><span class="dot"></span><span id="playerStatus">Paused · 待 播 放</span></div>
-    </div>
-    <div class="spectrum" aria-hidden="true">
-      <span></span><span></span><span></span><span></span>
-    </div>
-    <button class="play-btn" id="playBtn" aria-label="Play">
-      <svg id="playIcon" viewBox="0 0 12 12"><path d="M2 1 L11 6 L2 11 Z"/></svg>
-    </button>
-  </div>
+  <!-- Player moved out of #ui below -->
 
+</div>
+
+<!-- Player lives OUTSIDE #ui so it is never hidden by overlay tweens -->
+<div class="player" id="player">
+  <svg class="note-icon" viewBox="0 0 24 24" aria-hidden="true">
+    <path d="M9 18 V6 L19 4 V16"
+          stroke-linecap="round" stroke-linejoin="round"/>
+    <circle cx="6.5" cy="18" r="2.5" stroke-linecap="round"/>
+    <circle cx="16.5" cy="16" r="2.5" stroke-linecap="round"/>
+  </svg>
+  <div class="meta">
+    <div class="title-en">森 林 小 溪 · 白 噪 音</div>
+    <div class="status"><span class="dot"></span><span id="playerStatus">点 击 播 放</span></div>
+  </div>
+  <div class="spectrum" aria-hidden="true">
+    <span></span><span></span><span></span><span></span>
+  </div>
+  <button class="play-btn" id="playBtn" aria-label="Play">
+    <svg id="playIcon" viewBox="0 0 12 12"><path d="M2 1 L11 6 L2 11 Z"/></svg>
+  </button>
 </div>
 
 <div class="vignette" id="vignette"></div>
@@ -916,20 +926,20 @@ scene.add(bankMesh);
 
 /* ---- LAYER 2: mossy wet-grass edge (greener strip hugging water) ---- */
 const mossGeo = buildRibbon(streamCurve, 320,
-  t => streamW(t) + 0.7 + Math.sin(t * 17.0) * 0.25,
+  t => streamW(t) + 1.1 + Math.sin(t * 17.0) * 0.30,
   () => 0.020);
 const mossMat = new THREE.MeshStandardMaterial({
-  color: 0x4e7a30, roughness: 1,
+  color: 0x4a7330, roughness: 1,
 });
 const mossMesh = new THREE.Mesh(mossGeo, mossMat);
 scene.add(mossMesh);
 
-/* ---- LAYER 3: shallow underwater sand bed (light tan, slightly above bed) ---- */
+/* ---- LAYER 3: shallow sand bed (warm tan, slightly above ground) ---- */
 const bedGeo = buildRibbon(streamCurve, 320,
-  t => streamW(t) - 0.15,
-  () => 0.030);
+  t => streamW(t) - 0.20,
+  () => 0.028);
 const bedMat = new THREE.MeshStandardMaterial({
-  color: 0xb8a87e, roughness: 1, metalness: 0,
+  color: 0xa89878, roughness: 1, metalness: 0,
 });
 const bedMesh = new THREE.Mesh(bedGeo, bedMat);
 scene.add(bedMesh);
@@ -1006,29 +1016,29 @@ const waterMat = new THREE.ShaderMaterial({
       vec3 base = mix(uShallow, uMid, smoothstep(0.0, 0.5, depth));
       base      = mix(base, uDeep, smoothstep(0.5, 1.0, depth) * 0.85);
 
-      // Flowing UV — water moves along the ribbon (down the v-axis)
-      vec2 flowUV1 = vec2(vPosW.x * 0.18, vPosW.z * 0.18 - uTime * 0.06);
-      vec2 flowUV2 = vec2(vPosW.x * 0.45 + uTime * 0.04,
-                          vPosW.z * 0.45 - uTime * 0.10);
+      // Flowing UV — water drifts very slowly along the ribbon
+      vec2 flowUV1 = vec2(vPosW.x * 0.16, vPosW.z * 0.16 - uTime * 0.030);
+      vec2 flowUV2 = vec2(vPosW.x * 0.40 + uTime * 0.020,
+                          vPosW.z * 0.40 - uTime * 0.045);
       float n1 = fbm(flowUV1);
       float n2 = fbm(flowUV2);
 
-      // Mix in sky reflection on top of base — stronger on shallow zone
-      float skyMix = (0.30 + 0.25 * n1) * (0.45 + 0.55 * (1.0 - depth));
-      base = mix(base, uSky, skyMix * 0.55);
+      // Sky reflection — stronger on shallow zone, never harsh
+      float skyMix = (0.28 + 0.22 * n1) * (0.40 + 0.60 * (1.0 - depth));
+      base = mix(base, uSky, skyMix * 0.45);
 
-      // Subtle caustic shimmer (NOT bright sparkles)
-      float caustic = pow(n2, 2.2) * 0.45;
-      base += caustic * uSun * 0.18;
+      // Caustic shimmer — extremely subtle
+      float caustic = pow(n2, 2.4) * 0.30;
+      base += caustic * uSun * 0.10;
 
-      // Tiny ripple highlight — barely perceptible
-      base += vRipple * uSun * 0.5;
+      // Ripple highlight — barely perceptible
+      base += vRipple * uSun * 0.30;
 
-      // Edge feathering — soft transition to bank
-      float edgeFade = smoothstep(0.0, 0.30, vUv.x) * smoothstep(1.0, 0.70, vUv.x);
+      // Edge feathering — wide, soft, no hard rail
+      float edgeFade = smoothstep(0.0, 0.42, vUv.x) * smoothstep(1.0, 0.58, vUv.x);
 
-      // Translucency varies with depth: shallow ~ 0.55, deep ~ 0.88
-      float alpha = mix(0.55, 0.88, depth) * (0.55 + 0.45 * edgeFade);
+      // Translucency varies with depth: shallow ~ 0.40, deep ~ 0.82
+      float alpha = mix(0.40, 0.82, depth) * (0.45 + 0.55 * edgeFade);
 
       gl_FragColor = vec4(base, alpha);
     }
@@ -1187,7 +1197,7 @@ function tryAddTree(x, z, minStreamDist = 4.0, minCamDist = 9) {
 
 // LAYER A — close side bands. Wraps the viewer.
 // Mobile: +40%, Desktop: -15% from previous.
-const NEAR_PER_SIDE = isMobile ? 31 : 32;
+const NEAR_PER_SIDE = isMobile ? 36 : 28;
 for (let side = -1; side <= 1; side += 2) {
   let placed = 0, tries = 0;
   while (placed < NEAR_PER_SIDE && tries++ < NEAR_PER_SIDE * 6) {
@@ -1199,7 +1209,7 @@ for (let side = -1; side <= 1; side += 2) {
 }
 
 // LAYER B — far backdrop band
-const FAR_COUNT = isMobile ? 39 : 39;
+const FAR_COUNT = isMobile ? 46 : 34;
 for (let i = 0; i < FAR_COUNT; i++) {
   const x = (Math.random() - 0.5) * 140;
   const z = -42 - Math.random() * 18;
@@ -1210,7 +1220,7 @@ for (let i = 0; i < FAR_COUNT; i++) {
 }
 
 // LAYER C — foreground accents flanking the viewer
-const FRONT_COUNT = isMobile ? 11 : 12;
+const FRONT_COUNT = isMobile ? 14 : 10;
 for (let i = 0; i < FRONT_COUNT; i++) {
   const side = Math.random() > 0.5 ? 1 : -1;
   const x = side * (14 + Math.random() * 22);
@@ -1220,11 +1230,18 @@ for (let i = 0; i < FRONT_COUNT; i++) {
 
 // LAYER D (mobile only) — extra trees ahead of the stream to hug horizon
 if (isMobile) {
-  for (let i = 0; i < 14; i++) {
+  for (let i = 0; i < 22; i++) {
     const side = Math.random() > 0.5 ? 1 : -1;
     const x = side * (10 + Math.random() * 16);
     const z = -20 - Math.random() * 14;
     tryAddTree(x, z, 4.0, 8);
+  }
+  // LAYER E (mobile only) — a few trees ahead of the viewer (in front of stream)
+  for (let i = 0; i < 10; i++) {
+    const side = Math.random() > 0.5 ? 1 : -1;
+    const x = side * (16 + Math.random() * 14);
+    const z = -3 - Math.random() * 8;  // forward, not blocking center
+    tryAddTree(x, z, 4.0, 7);
   }
 }
 
@@ -1413,34 +1430,13 @@ rayPositions.forEach(rp => {
 });
 
 /* ============================================================
-   Audio — HTML5 nature loop (primary) + WebAudio noise (fallback)
+   Audio — HTML5 forest BGM (primary) + WebAudio noise (fallback)
    ============================================================ */
-/* Replace ./forest-stream.mp3 with your own asset for guaranteed playback.
-   We try the local file first, then a CDN fallback. */
-const BGM_SOURCES = [
-  './forest-stream.mp3',
-  'https://cdn.pixabay.com/audio/2022/03/15/audio_8cb749cba2.mp3',
-];
 const bgm = document.getElementById('bgm');
-bgm.crossOrigin = 'anonymous';
 bgm.volume = 0;
-
-let bgmSourceIdx = 0;
 let bgmLoadedOk = false;
-function setBgmSource(idx) {
-  bgmSourceIdx = idx;
-  bgm.src = BGM_SOURCES[idx];
-  bgm.load();
-}
-setBgmSource(0);
-
-bgm.addEventListener('canplay',  () => { bgmLoadedOk = true; });
-bgm.addEventListener('error', () => {
-  bgmLoadedOk = false;
-  if (bgmSourceIdx < BGM_SOURCES.length - 1) {
-    setBgmSource(bgmSourceIdx + 1);
-  }
-});
+bgm.addEventListener('canplay', () => { bgmLoadedOk = true; });
+bgm.addEventListener('error',   () => { bgmLoadedOk = false; });
 
 let webAudioCtx = null;
 let webAudioMaster = null;
@@ -1652,19 +1648,21 @@ const enterCn = document.getElementById('enterCn');
 const ICON_PLAY  = '<path d="M2 1 L11 6 L2 11 Z"/>';
 const ICON_PAUSE = '<rect x="2" y="1.5" width="2.5" height="9" rx="0.5"/><rect x="7.5" y="1.5" width="2.5" height="9" rx="0.5"/>';
 
+let everPlayed = false;
 function setPlayingUI(playing) {
   if (playing) {
+    everPlayed = true;
     playerEl.classList.add('playing');
     playIcon.innerHTML = ICON_PAUSE;
     playBtn.setAttribute('aria-label', 'Pause');
-    playerStatus.textContent = 'Now Playing · 正 在 聆 听';
+    playerStatus.textContent = '正 在 播 放';
     enterCn.textContent = '在 安 全 岛';
     hintEl.classList.add('fade');
   } else {
     playerEl.classList.remove('playing');
     playIcon.innerHTML = ICON_PLAY;
     playBtn.setAttribute('aria-label', 'Play');
-    playerStatus.textContent = 'Paused · 待 播 放';
+    playerStatus.textContent = everPlayed ? '已 暂 停' : '点 击 播 放';
     enterCn.textContent = '进 入 安 全 岛';
   }
 }
@@ -1875,7 +1873,7 @@ gsap.from('.fs',           { opacity: 0, y: -16, duration: 2.4, delay: 0.6, ease
 gsap.from('.mini-actions', { opacity: 0, x:  16, duration: 2.4, delay: 1.0, ease: 'power2.out' });
 gsap.from('.breathe',      { opacity: 0, x: -20, duration: 2.4, delay: 1.2, ease: 'power2.out' });
 gsap.from('.enter',        { opacity: 0, y:  20, duration: 2.4, delay: 1.4, ease: 'power2.out' });
-gsap.from('.player',       { opacity: 0, duration: 2.4, delay: 1.6, ease: 'power2.out' });
+/* NOTE: player intentionally has no entry tween — it must be present from frame 1 */
 
 /* ---------- Resize ---------- */
 function onResize() {
