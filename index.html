@@ -61,62 +61,144 @@
   /* ---------- TOP LEFT — editorial masthead ---------- */
   .masthead {
     position: absolute;
-    top: calc(var(--safe-top) + 38px);
-    left: 40px;
+    top: calc(var(--safe-top) + 56px);
+    left: 36px;
     pointer-events: none;
-  }
-  .masthead .eyebrow {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    font-family: 'Inter', sans-serif;
-    font-size: 9px;
-    font-weight: 300;
-    letter-spacing: 0.32em;
-    text-transform: uppercase;
-    color: var(--ink-soft);
-    margin-bottom: 22px;
-  }
-  .masthead .eyebrow::before {
-    content: '';
-    width: 28px;
-    height: 1px;
-    background: var(--hair);
+    text-align: left;
   }
   .masthead h1 {
     font-family: var(--serif);
     font-weight: 300;
-    font-size: clamp(38px, 8vw, 64px);
-    letter-spacing: 0.18em;
+    font-size: clamp(34px, 7.5vw, 56px);
+    letter-spacing: 0.22em;
     line-height: 1;
-    color: var(--ink);
+    color: rgba(255, 255, 255, 0.92);
     text-transform: uppercase;
-    margin-bottom: 14px;
-    margin-left: -2px;
+    margin: 0 0 18px -2px;
+    text-shadow: 0 1px 12px rgba(20, 40, 20, 0.22);
   }
   .masthead .cn {
     font-family: var(--cn);
     font-weight: 200;
     font-size: 13px;
-    letter-spacing: 0.5em;
-    color: var(--ink-soft);
-    padding-left: 4px;
-  }
-  .masthead .rule {
-    margin-top: 28px;
-    width: 56px;
-    height: 1px;
-    background: var(--hair);
+    letter-spacing: 0.55em;
+    color: rgba(255, 255, 255, 0.74);
+    padding-left: 3px;
+    margin-bottom: 30px;
+    text-shadow: 0 1px 10px rgba(20, 40, 20, 0.22);
   }
   .masthead .caption {
-    margin-top: 20px;
     font-family: var(--cn);
     font-weight: 200;
     font-size: 11px;
-    letter-spacing: 0.35em;
-    color: var(--ink-faint);
-    line-height: 1.9;
-    max-width: 240px;
+    letter-spacing: 0.42em;
+    color: rgba(255, 255, 255, 0.46);
+    padding-left: 3px;
+    text-shadow: 0 1px 10px rgba(20, 40, 20, 0.22);
+  }
+
+  /* Hide deprecated controls completely */
+  .legacy-hidden {
+    position: absolute !important;
+    width: 1px; height: 1px;
+    padding: 0; margin: -1px;
+    overflow: hidden; clip: rect(0,0,0,0);
+    white-space: nowrap; border: 0;
+    pointer-events: none;
+    opacity: 0;
+  }
+
+  /* ---------- Breathing orb ----------
+     Natural breath: 4s inhale → 6s exhale → 10s cycle.
+     Orb scales 0.80 → 1.10. Halo rings echo at slightly larger amplitude.
+     Phase label crossfades between 吸气 / 呼气. */
+  .breath-orb {
+    position: absolute;
+    left: 50%;
+    top: 52%;
+    transform: translate(-50%, -50%);
+    width: 200px;
+    height: 200px;
+    pointer-events: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .breath-orb .core,
+  .breath-orb .ring {
+    position: absolute;
+    border-radius: 50%;
+    will-change: transform, opacity;
+  }
+  .breath-orb .core {
+    width: 56%;
+    height: 56%;
+    background: radial-gradient(
+      circle at 38% 36%,
+      rgba(255, 255, 255, 0.85) 0%,
+      rgba(255, 255, 255, 0.45) 38%,
+      rgba(255, 255, 255, 0.12) 70%,
+      rgba(255, 255, 255, 0) 100%
+    );
+    box-shadow: 0 0 48px rgba(255, 255, 255, 0.25);
+    animation: breathCore 10s cubic-bezier(0.45, 0, 0.55, 1) infinite;
+  }
+  .breath-orb .ring-1 {
+    width: 72%; height: 72%;
+    border: 1px solid rgba(255, 255, 255, 0.45);
+    animation: breathRing 10s cubic-bezier(0.45, 0, 0.55, 1) infinite;
+  }
+  .breath-orb .ring-2 {
+    width: 86%; height: 86%;
+    border: 1px solid rgba(255, 255, 255, 0.30);
+    animation: breathRing 10s cubic-bezier(0.45, 0, 0.55, 1) infinite;
+    animation-delay: 0.4s;
+  }
+  .breath-orb .ring-3 {
+    width: 100%; height: 100%;
+    border: 1px solid rgba(255, 255, 255, 0.18);
+    animation: breathRing 10s cubic-bezier(0.45, 0, 0.55, 1) infinite;
+    animation-delay: 0.8s;
+  }
+  .breath-orb .phase {
+    position: absolute;
+    bottom: -38px;
+    left: 50%;
+    transform: translateX(-50%);
+    font-family: var(--cn);
+    font-weight: 200;
+    font-size: 12px;
+    letter-spacing: 0.5em;
+    color: rgba(255, 255, 255, 0.62);
+    text-shadow: 0 1px 10px rgba(20, 40, 20, 0.22);
+    padding-left: 4px;
+    white-space: nowrap;
+    transition: opacity 0.6s ease;
+  }
+
+  @keyframes breathCore {
+    /* Inhale 0-40% (4s out of 10s), exhale 40-100% (6s) */
+    0%   { transform: scale(0.80); opacity: 0.75; }
+    40%  { transform: scale(1.10); opacity: 1; }
+    100% { transform: scale(0.80); opacity: 0.75; }
+  }
+  @keyframes breathRing {
+    0%   { transform: scale(0.78); opacity: 0.15; }
+    40%  { transform: scale(1.18); opacity: 0.85; }
+    100% { transform: scale(0.78); opacity: 0.15; }
+  }
+
+  @media (max-width: 768px) {
+    .breath-orb { width: 170px; height: 170px; top: 52%; }
+    .breath-orb .phase { font-size: 11px; letter-spacing: 0.46em; bottom: -32px; }
+  }
+  @media (max-width: 380px) {
+    .breath-orb { width: 150px; height: 150px; }
+  }
+
+  body.pre-entry .breath-orb {
+    opacity: 0;
+    pointer-events: none;
   }
 
   /* ---------- TOP RIGHT — fullscreen "art entry" ---------- */
@@ -309,7 +391,7 @@
   }
   .enter:hover .arrow { transform: translateX(6px); }
 
-  /* ---------- Permanent bottom player — transparent liquid glass ---------- */
+  /* ---------- Bottom player — iOS Liquid Glass ---------- */
   .player {
     position: fixed;
     left: 50%;
@@ -318,26 +400,24 @@
     z-index: 99999;
     display: flex;
     align-items: center;
-    gap: 18px;
-    padding: 10px 12px 10px 22px;
-    background: rgba(255, 255, 255, 0.16);
-    backdrop-filter: blur(32px) saturate(180%) brightness(1.08);
-    -webkit-backdrop-filter: blur(32px) saturate(180%) brightness(1.08);
-    border: 1px solid rgba(255, 255, 255, 0.42);
+    gap: 16px;
+    padding: 11px 12px 11px 22px;
+    background: rgba(255, 255, 255, 0.04);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    border: 1px solid rgba(255, 255, 255, 0.25);
     border-radius: 999px;
     box-shadow:
-      0 18px 50px rgba(40, 70, 40, 0.10),
-      inset 0 1px 0 rgba(255, 255, 255, 0.55),
-      inset 0 -1px 0 rgba(255, 255, 255, 0.12);
+      0 6px 24px rgba(0, 0, 0, 0.10);
     min-width: 290px;
-    max-width: min(380px, 86vw);
+    max-width: min(360px, 82vw);
     width: max-content;
     animation: playerFloat 9s ease-in-out infinite;
     will-change: transform;
     pointer-events: auto;
     opacity: 1 !important;
     visibility: visible !important;
-    color: rgba(255, 255, 255, 0.94);
+    color: rgba(255, 255, 255, 0.92);
   }
   @keyframes playerFloat {
     0%, 100% { transform: translate(-50%, 0); }
@@ -345,11 +425,10 @@
   }
   .player .note-icon {
     flex-shrink: 0;
-    width: 20px; height: 20px;
-    stroke: rgba(255, 255, 255, 0.94);
+    width: 22px; height: 22px;
+    stroke: rgba(255, 255, 255, 0.85);
     fill: none;
-    stroke-width: 0.85;
-    filter: drop-shadow(0 1px 4px rgba(20, 40, 20, 0.18));
+    stroke-width: 0.9;
   }
   .player .meta {
     flex: 1;
@@ -361,10 +440,9 @@
   .player .title-en {
     font-family: var(--cn);
     font-weight: 300;
-    font-size: 12px;
-    letter-spacing: 0.30em;
-    color: rgba(255, 255, 255, 0.94);
-    text-shadow: 0 1px 8px rgba(20, 40, 20, 0.18);
+    font-size: 13px;
+    letter-spacing: 0.26em;
+    color: rgba(255, 255, 255, 0.88);
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -375,19 +453,18 @@
     gap: 8px;
     font-family: var(--cn);
     font-weight: 200;
-    font-size: 10px;
-    letter-spacing: 0.32em;
-    color: rgba(255, 255, 255, 0.72);
-    text-shadow: 0 1px 8px rgba(20, 40, 20, 0.18);
+    font-size: 11px;
+    letter-spacing: 0.30em;
+    color: rgba(255, 255, 255, 0.55);
   }
   .player .status .dot {
     width: 4px; height: 4px;
     border-radius: 50%;
-    background: rgba(255, 255, 255, 0.45);
+    background: rgba(255, 255, 255, 0.55);
     transition: background 0.8s ease;
   }
   .player.playing .status .dot {
-    background: rgba(255, 255, 255, 0.92);
+    background: rgba(255, 255, 255, 0.85);
     animation: dotPulse 2.6s ease-in-out infinite;
   }
   @keyframes dotPulse {
@@ -401,16 +478,16 @@
     align-items: center;
     gap: 3px;
     height: 16px;
-    width: 22px;
+    width: 24px;
     flex-shrink: 0;
-    opacity: 0.42;
+    opacity: 0.55;
     transition: opacity 1.2s ease;
   }
   .player.playing .spectrum { opacity: 0.85; }
   .spectrum span {
     flex: 1;
     max-width: 2px;
-    background: rgba(255, 255, 255, 0.82);
+    background: rgba(255, 255, 255, 0.78);
     border-radius: 1px;
     height: 30%;
   }
@@ -427,28 +504,25 @@
 
   .play-btn {
     flex-shrink: 0;
-    width: 38px; height: 38px;
+    width: 40px; height: 40px;
     border-radius: 50%;
-    border: 1px solid rgba(255, 255, 255, 0.46);
-    background: rgba(255, 255, 255, 0.14);
-    backdrop-filter: blur(20px) saturate(180%);
-    -webkit-backdrop-filter: blur(20px) saturate(180%);
+    border: 1px solid rgba(255, 255, 255, 0.25);
+    background: rgba(255, 255, 255, 0.04);
+    backdrop-filter: blur(6px);
+    -webkit-backdrop-filter: blur(6px);
     cursor: pointer;
     display: flex; align-items: center; justify-content: center;
     transition: background 1.2s ease, border-color 1.2s ease;
-    box-shadow:
-      inset 0 1px 0 rgba(255, 255, 255, 0.45),
-      inset 0 -1px 0 rgba(255, 255, 255, 0.10);
-    color: rgba(255, 255, 255, 0.94);
+    box-shadow: none;
+    color: rgba(255, 255, 255, 0.92);
   }
   .play-btn:hover {
-    background: rgba(255, 255, 255, 0.22);
-    border-color: rgba(255, 255, 255, 0.56);
+    background: rgba(255, 255, 255, 0.10);
+    border-color: rgba(255, 255, 255, 0.32);
   }
   .play-btn svg {
     width: 11px; height: 11px;
-    fill: rgba(255, 255, 255, 0.94);
-    filter: drop-shadow(0 1px 3px rgba(20, 40, 20, 0.20));
+    fill: rgba(255, 255, 255, 0.92);
   }
 
   /* ---------- Gyro / Mood — small text links under fs ---------- */
@@ -519,77 +593,26 @@
      ============================================================ */
   @media (max-width: 768px) {
     .masthead {
-      top: calc(var(--safe-top) + 30px);
-      left: 26px;
+      top: calc(var(--safe-top) + 36px);
+      left: 24px;
     }
-    .masthead .eyebrow { font-size: 10px; letter-spacing: 0.36em; margin-bottom: 18px; color: rgba(255,255,255,0.78); }
-    .masthead .eyebrow::before { width: 24px; background: rgba(255,255,255,0.42); }
     .masthead h1 {
-      font-size: clamp(40px, 13vw, 56px);
-      letter-spacing: 0.16em;
-      margin-bottom: 12px;
+      font-size: clamp(34px, 11vw, 44px);
+      letter-spacing: 0.20em;
+      margin: 0 0 14px -1px;
     }
-    .masthead .cn { font-size: 14px; letter-spacing: 0.46em; color: rgba(255,255,255,0.85); }
-    .masthead .rule { margin-top: 22px; width: 44px; background: rgba(255,255,255,0.42); }
-    .masthead .caption {
-      display: block;
-      font-size: 12px;
-      letter-spacing: 0.22em;
-      line-height: 2;
-      color: rgba(255,255,255,0.66);
-      max-width: 240px;
-      margin-top: 18px;
-    }
-
-    .fs {
-      top: calc(var(--safe-top) + 30px);
-      right: 26px;
-      gap: 10px;
-    }
-    .fs .ring {
-      width: 44px; height: 44px;
-      background: rgba(255, 255, 255, 0.18);
-      border-color: rgba(255, 255, 255, 0.44);
-    }
-    .fs .ring svg { width: 15px; height: 15px; stroke: rgba(255,255,255,0.94); stroke-width: 0.85; }
-    .fs .label { font-size: 11px; letter-spacing: 0.36em; color: rgba(255,255,255,0.72); }
-
-    .mini-actions {
-      top: calc(var(--safe-top) + 118px);
-      right: 26px;
-      gap: 14px;
-    }
-    .mini-link { font-size: 11px; letter-spacing: 0.34em; color: rgba(255,255,255,0.66); }
-    .mini-link::before { color: rgba(255,255,255,0.42); }
-
-    .breathe {
-      left: 26px;
-      bottom: calc(var(--safe-bottom) + 240px);
-      gap: 18px;
-    }
-    .breathe .label-en { font-size: 13px; letter-spacing: 0.42em; color: rgba(255,255,255,0.95); }
-    .breathe .label-cn { font-size: 11px; letter-spacing: 0.42em; color: rgba(255,255,255,0.6); margin-top: -6px; }
-    .orb { width: 72px; height: 72px; margin-top: 8px; }
-
-    .enter {
-      left: 26px;
-      bottom: calc(var(--safe-bottom) + 124px);
-      column-gap: 18px;
-    }
-    .enter .num { font-size: 62px; padding-right: 18px; }
-    .enter .en { font-size: 11px; letter-spacing: 0.38em; color: rgba(255,255,255,0.78); }
-    .enter .cn { font-size: 14px; letter-spacing: 0.28em; gap: 12px; color: rgba(255,255,255,0.95); }
-    .enter .arrow { font-size: 17px; }
+    .masthead .cn { font-size: 12px; letter-spacing: 0.55em; margin-bottom: 22px; }
+    .masthead .caption { font-size: 10px; letter-spacing: 0.42em; }
 
     /* mobile player: airy, capped at 86vw, always visible */
     .player {
       bottom: calc(env(safe-area-inset-bottom, 0px) + 18px);
       width: max-content;
       min-width: 280px;
-      max-width: 86vw;
-      padding: 10px 11px 10px 20px;
+      max-width: 84vw;
+      padding: 9px 11px 9px 20px;
       gap: 14px;
-      border-color: rgba(255, 255, 255, 0.42);
+      border-color: rgba(255, 255, 255, 0.18);
     }
     .player .title-en { font-size: 12px; letter-spacing: 0.26em; }
     .player .status { font-size: 10px; letter-spacing: 0.28em; }
@@ -597,32 +620,24 @@
     .spectrum { width: 22px; height: 15px; }
     .play-btn { width: 38px; height: 38px; }
     .play-btn svg { width: 12px; height: 12px; }
-
-    /* mobile mood toggle gets a small adjustment when player anchored center */
-    /* Keep player float subtler on mobile to avoid horizontal drift */
   }
 
   @media (max-width: 380px) {
-    .masthead h1 { font-size: clamp(38px, 13.5vw, 52px); letter-spacing: 0.14em; }
-    .masthead .caption { font-size: 11px; }
-    .enter .num { font-size: 54px; }
-    .enter .cn { font-size: 13px; }
-    .breathe { bottom: calc(var(--safe-bottom) + 230px); }
+    .masthead h1 { font-size: clamp(30px, 12vw, 38px); letter-spacing: 0.18em; }
+    .masthead .caption { font-size: 9px; }
     .player {
       max-width: 92vw;
       min-width: 260px;
-      padding: 10px 11px 10px 16px;
-      gap: 10px;
+      padding: 9px 11px 9px 16px;
+      gap: 12px;
     }
     .player .title-en { font-size: 11px; }
     .player .status { font-size: 9px; }
   }
 
   @media (max-height: 480px) and (orientation: landscape) {
-    .masthead h1 { font-size: 32px; }
+    .masthead h1 { font-size: 28px; }
     .masthead .caption { display: none; }
-    .breathe { display: none; }
-    .enter .num { font-size: 42px; }
   }
 
   /* ============================================================
@@ -658,35 +673,32 @@
     display: inline-flex;
     align-items: center;
     gap: 16px;
-    padding: 18px 28px;
-    background: rgba(255, 255, 255, 0.16);
-    backdrop-filter: blur(32px) saturate(180%) brightness(1.08);
-    -webkit-backdrop-filter: blur(32px) saturate(180%) brightness(1.08);
-    border: 1px solid rgba(255, 255, 255, 0.42);
+    padding: 16px 26px;
+    background: rgba(255, 255, 255, 0.04);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    border: 1px solid rgba(255, 255, 255, 0.25);
     border-radius: 999px;
     cursor: pointer;
     font-family: var(--cn);
-    color: rgba(255, 255, 255, 0.94);
-    transition: background 1.4s ease, border-color 1.4s ease, transform 1.4s ease;
-    box-shadow:
-      0 18px 50px rgba(40, 70, 40, 0.10),
-      inset 0 1px 0 rgba(255, 255, 255, 0.55),
-      inset 0 -1px 0 rgba(255, 255, 255, 0.12);
+    color: rgba(255, 255, 255, 0.92);
+    transition: background 1.4s ease, border-color 1.4s ease, transform 0.35s ease, opacity 0.35s ease, filter 0.35s ease;
+    box-shadow: 0 6px 24px rgba(0, 0, 0, 0.10);
     animation: entryBreathe 7s ease-in-out infinite;
   }
   .entry-cta:hover {
-    background: rgba(255, 255, 255, 0.22);
-    border-color: rgba(255, 255, 255, 0.52);
+    background: rgba(255, 255, 255, 0.10);
+    border-color: rgba(255, 255, 255, 0.32);
   }
   .entry-cta:active { transform: scale(0.985); }
 
   .entry-cta-text {
     font-weight: 200;
-    font-size: 14px;
+    font-size: 13px;
     letter-spacing: 0.42em;
     padding-left: 4px;
     color: rgba(255, 255, 255, 0.94);
-    text-shadow: 0 1px 8px rgba(20, 40, 20, 0.18);
+    text-shadow: 0 1px 10px rgba(20, 40, 20, 0.22);
   }
   .entry-cta-arrow {
     font-family: var(--serif);
@@ -694,34 +706,28 @@
     font-size: 18px;
     line-height: 1;
     color: rgba(255, 255, 255, 0.88);
-    text-shadow: 0 1px 8px rgba(20, 40, 20, 0.18);
+    text-shadow: 0 1px 10px rgba(20, 40, 20, 0.22);
     transition: transform 1.4s ease;
   }
   .entry-cta:hover .entry-cta-arrow { transform: translateX(6px); }
 
   @keyframes entryBreathe {
-    0%, 100% { box-shadow:
-      0 18px 50px rgba(40, 70, 40, 0.10),
-      inset 0 1px 0 rgba(255, 255, 255, 0.50),
-      inset 0 -1px 0 rgba(255, 255, 255, 0.10); }
-    50%      { box-shadow:
-      0 20px 56px rgba(40, 70, 40, 0.14),
-      inset 0 1px 0 rgba(255, 255, 255, 0.62),
-      inset 0 -1px 0 rgba(255, 255, 255, 0.14); }
-  }
+    0%, 100% { box-shadow: 0 6px 24px rgba(0, 0, 0, 0.10); }
+    50%      { box-shadow: 0 8px 30px rgba(0, 0, 0, 0.14); }
   }
 
   /* States used by JS */
+  .entry {
+    transition: transform 0.32s cubic-bezier(0.4, 0.0, 0.2, 1);
+  }
   .entry.is-leaving {
-    opacity: 0 !important;
-    transform: translate(-50%, calc(-50% - 10px)) scale(0.98) !important;
-    filter: blur(8px);
+    /* press shrink — JS will later set inline transform to pop back to 1.03 */
+    transform: translate(-50%, -50%) scale(0.96);
     pointer-events: none;
-    transition: opacity 0.35s ease, transform 0.35s ease, filter 0.35s ease;
   }
   .entry-veil.is-leaving {
     opacity: 0;
-    transition: opacity 0.35s ease;
+    transition: opacity 0.6s ease;
   }
   .entry.is-gone { display: none !important; }
   .entry-veil.is-gone { display: none !important; }
@@ -766,53 +772,27 @@
 
   <!-- TOP LEFT — masthead -->
   <header class="masthead">
-    <div class="eyebrow">Volume I · A Quiet Place</div>
     <h1>Sanctuary</h1>
     <div class="cn">安 全 岛</div>
-    <div class="rule"></div>
-    <div class="caption">呼 吸 · 聆 听 · 安 住<br/>Breathe · Listen · Be Held</div>
+    <div class="caption">呼 吸 · 聆 听 · 放 松</div>
   </header>
 
-  <!-- TOP RIGHT — fullscreen entry -->
-  <button class="fs" id="fsBtn" aria-label="Fullscreen">
-    <span class="ring">
-      <svg viewBox="0 0 24 24" aria-hidden="true">
-        <path d="M4 9 V4 H9"   stroke-linecap="round"/>
-        <path d="M15 4 H20 V9" stroke-linecap="round"/>
-        <path d="M20 15 V20 H15" stroke-linecap="round"/>
-        <path d="M9 20 H4 V15" stroke-linecap="round"/>
-      </svg>
-    </span>
-    <span class="label" id="fsLabel">全 屏 体 验</span>
-  </button>
-
-  <!-- Mini text actions under fs -->
-  <div class="mini-actions">
-    <button class="mini-link" id="gyroBtn">开 启 体 感</button>
-    <button class="mini-link" id="moodBtn">黄 昏 时 分</button>
+  <!-- Breathing orb — paced like a natural human breath (~10s cycle) -->
+  <div class="breath-orb" aria-hidden="true">
+    <div class="ring ring-3"></div>
+    <div class="ring ring-2"></div>
+    <div class="ring ring-1"></div>
+    <div class="core"></div>
+    <div class="phase">吸 气</div>
   </div>
 
-  <!-- LEFT MID — breathing orb -->
-  <div class="breathe">
-    <div class="label-en">Breathe</div>
-    <div class="label-cn">跟 随 呼 吸</div>
-    <div class="orb">
-      <div class="halo2"></div>
-      <div class="halo"></div>
-      <div class="core"></div>
-    </div>
-  </div>
-
-  <!-- LEFT BOTTOM — editorial enter button -->
-  <button class="enter" id="musicBtn" aria-label="Enter Sanctuary">
-    <div class="num">01</div>
-    <div class="meta">
-      <div class="en">Enter Sanctuary</div>
-      <div class="cn"><span id="enterCn">进 入 安 全 岛</span><span class="arrow">→</span></div>
-    </div>
-  </button>
-
-  <!-- Player moved out of #ui below -->
+  <!-- Hidden legacy controls — kept as no-op anchors for JS handlers -->
+  <button id="musicBtn" class="legacy-hidden" aria-hidden="true" tabindex="-1"></button>
+  <button id="fsBtn"    class="legacy-hidden" aria-hidden="true" tabindex="-1"></button>
+  <button id="gyroBtn"  class="legacy-hidden" aria-hidden="true" tabindex="-1"></button>
+  <button id="moodBtn"  class="legacy-hidden" aria-hidden="true" tabindex="-1"></button>
+  <span   id="fsLabel"  class="legacy-hidden" aria-hidden="true"></span>
+  <span   id="enterCn"  class="legacy-hidden" aria-hidden="true"></span>
 
 </div>
 
@@ -863,7 +843,7 @@ const isPortrait = innerHeight > innerWidth;
 
 /* ---------- Scene ---------- */
 const scene = new THREE.Scene();
-scene.fog = new THREE.FogExp2(0xc8e6a8, 0.024);
+scene.fog = new THREE.FogExp2(0xc8e6a8, 0.030);
 
 const camera = new THREE.PerspectiveCamera(
   isPortrait ? 64 : 54,
@@ -882,7 +862,7 @@ renderer.setPixelRatio(Math.min(devicePixelRatio, isMobile ? 1.25 : 2));
 renderer.setSize(innerWidth, innerHeight);
 renderer.outputColorSpace = THREE.SRGBColorSpace;
 renderer.toneMapping = THREE.ACESFilmicToneMapping;
-renderer.toneMappingExposure = 0.92;
+renderer.toneMappingExposure = 0.85;
 
 function setVh() {
   document.documentElement.style.setProperty('--vh', `${innerHeight * 0.01}px`);
@@ -924,14 +904,14 @@ const skyDome = new THREE.Mesh(new THREE.SphereGeometry(110, 32, 24), skyMat);
 scene.add(skyDome);
 
 /* ---------- Lights ---------- */
-const ambient = new THREE.AmbientLight(0xfff5d8, 0.55);
+const ambient = new THREE.AmbientLight(0xfff5d8, 0.45);
 scene.add(ambient);
 
-const sun = new THREE.DirectionalLight(0xfff0c8, 0.85);
+const sun = new THREE.DirectionalLight(0xfff0c8, 0.65);
 sun.position.set(-18, 22, -10);
 scene.add(sun);
 
-const hemi = new THREE.HemisphereLight(0xeaf7d4, 0x4a6a30, 0.55);
+const hemi = new THREE.HemisphereLight(0xeaf7d4, 0x4a6a30, 0.45);
 scene.add(hemi);
 
 const fillBack = new THREE.DirectionalLight(0xffe9b8, 0.3);
@@ -1606,11 +1586,18 @@ function updateAnimals(dt, t) {
             const swing = Math.sin(a.bobPhase + phases[i]) * 0.55; // ±31°
             hip.rotation.x = swing;
           });
+          // tiny body sway + head bob synced to stride
+          o.rotation.z = Math.sin(a.bobPhase * 2) * 0.04;
+          if (o.userData.head) {
+            o.userData.head.rotation.x =
+              (o.userData.head.rotation.x || 0) + Math.sin(a.bobPhase * 2) * 0.015;
+          }
         }
       }
     } else if (a.state === 'sit') {
       a.sitOffset = Math.min(a.sitOffset + dt * 0.8, 0.06);
       o.position.y = -a.sitOffset;
+      o.rotation.z *= 0.9;
       // ease legs back to neutral
       if (o.userData.legs && a.kind !== 'rabbit') {
         o.userData.legs.forEach(hip => { hip.rotation.x *= 0.85; });
@@ -1619,6 +1606,7 @@ function updateAnimals(dt, t) {
       // pause
       a.sitOffset = Math.max(a.sitOffset - dt * 0.8, 0);
       o.position.y = -a.sitOffset;
+      o.rotation.z *= 0.9;
       // ease legs back to neutral standing
       if (o.userData.legs && a.kind !== 'rabbit') {
         o.userData.legs.forEach(hip => { hip.rotation.x *= 0.85; });
@@ -1987,8 +1975,8 @@ const rayPositions = isMobile ? [
 rayPositions.forEach(rp => {
   const r = makeGodRay(rp.w, rp.h);
   r.position.set(rp.x, rp.h / 2 + 0.5, rp.z);
-  // halve the visibility — was 0.18–0.32, now 0.09–0.16
-  r.userData.baseIntensity = 0.09 + Math.random() * 0.07;
+  // halved again — softer Tyndall, no stage spotlights
+  r.userData.baseIntensity = 0.05 + Math.random() * 0.04;
   r.material.uniforms.uIntensity.value = r.userData.baseIntensity;
   scene.add(r);
   godRays.push(r);
@@ -2281,9 +2269,9 @@ playBtn.addEventListener('click', (e) => { e.stopPropagation(); toggleMusic(); }
 function onMusicOn() {
   gsap.to(grassUniforms.uWind, { value: 1.25, duration: 4.5, ease: 'power2.out' });
   gsap.to(state, { particleSpeed: 0.55, rayBoost: 0.18, duration: 4.5 });
-  gsap.to(ambient, { intensity: 0.72, duration: 4.5 });
-  gsap.to(sun,     { intensity: 1.05, duration: 4.5 });
-  gsap.to(hemi,    { intensity: 0.72, duration: 4.5 });
+  gsap.to(ambient, { intensity: 0.58, duration: 4.5 });
+  gsap.to(sun,     { intensity: 0.82, duration: 4.5 });
+  gsap.to(hemi,    { intensity: 0.58, duration: 4.5 });
   gsap.to(pollen.points.material,    { size: 0.10, opacity: 0.85, duration: 3 });
   gsap.to(dust.points.material,      { size: 0.04, opacity: 0.78, duration: 3 });
   gsap.to(dandelion.points.material, { size: 0.5,  opacity: 0.78, duration: 3 });
@@ -2293,9 +2281,9 @@ function onMusicOn() {
 function onMusicOff() {
   gsap.to(grassUniforms.uWind, { value: 1.0, duration: 4.5 });
   gsap.to(state, { particleSpeed: 0.85, rayBoost: 0, duration: 4.5 });
-  gsap.to(ambient, { intensity: 0.62, duration: 4.5 });
-  gsap.to(sun,     { intensity: 0.95, duration: 4.5 });
-  gsap.to(hemi,    { intensity: 0.62, duration: 4.5 });
+  gsap.to(ambient, { intensity: 0.50, duration: 4.5 });
+  gsap.to(sun,     { intensity: 0.72, duration: 4.5 });
+  gsap.to(hemi,    { intensity: 0.50, duration: 4.5 });
   gsap.to(pollen.points.material,    { size: 0.085, opacity: 0.75, duration: 3 });
   gsap.to(dust.points.material,      { size: 0.035, opacity: 0.68, duration: 3 });
   gsap.to(dandelion.points.material, { size: 0.44, opacity: 0.7,  duration: 3 });
@@ -2438,40 +2426,40 @@ async function enterSanctuary() {
   if (entered) return;
   entered = true;
 
-  // 1. DISABLE the CTA immediately so it can't be re-clicked
+  // 1. Disable CTA so it can't be re-clicked
   entryCta.style.pointerEvents = 'none';
   entryCta.disabled = true;
 
-  // 2. Trigger exit animation NOW (0.35s opacity + blur + lift)
-  entryEl.classList.add('is-leaving');
-  entryVeil.classList.add('is-leaving');
+  // 2. Press feedback only: shrink → spring back. No fade, no blur, no lift.
+  entryEl.classList.add('is-leaving');         // scale(0.96)
+  setTimeout(() => {
+    entryEl.style.transform = 'translate(-50%, -50%) scale(1.03)';
+  }, 320);
 
-  // 3. Remove from DOM at 400ms — well before any other UI animation finishes
+  // 3. After the spring back finishes (720ms), hard-hide the entry,
+  //    THEN reveal masthead + player. Nothing overlaps.
   setTimeout(() => {
     entryEl.classList.add('is-gone');
     entryVeil.classList.add('is-gone');
-  }, 400);
 
-  // 4. Reveal UI: body class flip → CSS transition fades #ui / .player in
-  document.body.classList.remove('pre-entry');
+    // Now (and only now) let the rest of the UI in
+    document.body.classList.remove('pre-entry');
 
-  // 5. Lift the scene atmosphere very gently (warmer light, slightly slower particles)
-  gsap.to(ambient, { intensity: 0.62, duration: 2.2, ease: 'power2.out' });
-  gsap.to(sun,     { intensity: 0.95, duration: 2.2, ease: 'power2.out' });
-  gsap.to(hemi,    { intensity: 0.62, duration: 2.2, ease: 'power2.out' });
+    gsap.from('.masthead', { opacity: 0, y: -10, duration: 2.0, delay: 0.1, ease: 'power2.out' });
+    gsap.from('.player',   { opacity: 0, y:  10, duration: 1.8, delay: 0.4, ease: 'power2.out',
+                             onComplete() { gsap.set('.player', { clearProps: 'opacity,transform' }); } });
+  }, 720);
+
+  // Veil dims out gently in parallel
+  entryVeil.classList.add('is-leaving');
+
+  // Scene atmosphere lifts immediately on click (slow, 2.2s) — visible behind veil
+  gsap.to(ambient, { intensity: 0.50, duration: 2.2, ease: 'power2.out' });
+  gsap.to(sun,     { intensity: 0.72, duration: 2.2, ease: 'power2.out' });
+  gsap.to(hemi,    { intensity: 0.50, duration: 2.2, ease: 'power2.out' });
   gsap.to(state,   { particleSpeed: 0.85, duration: 2.4, ease: 'power2.out' });
 
-  // 6. Editorial entrance: tween elements in with their own subtle motion,
-  //    layered after the veil starts dissolving.
-  gsap.from('.masthead',     { opacity: 0, y: -14, duration: 2.0, delay: 0.5, ease: 'power2.out' });
-  gsap.from('.fs',           { opacity: 0, y: -14, duration: 2.0, delay: 0.7, ease: 'power2.out' });
-  gsap.from('.mini-actions', { opacity: 0, x:  14, duration: 2.0, delay: 1.0, ease: 'power2.out' });
-  gsap.from('.breathe',      { opacity: 0, x: -18, duration: 2.0, delay: 1.2, ease: 'power2.out' });
-  gsap.from('.enter',        { opacity: 0, y:  18, duration: 2.0, delay: 1.4, ease: 'power2.out' });
-  gsap.from('.player',       { opacity: 0, y:  12, duration: 1.8, delay: 1.6, ease: 'power2.out',
-                               onComplete() { gsap.set('.player', { clearProps: 'opacity,transform' }); } });
-
-  // 7. Start BGM and fade volume 0 → target over ~2s
+  // Start BGM right away — gives the entry click an immediate audible reward
   try {
     await bgm.play();
     state.music = true;
@@ -2487,6 +2475,33 @@ async function enterSanctuary() {
 
 entryCta.addEventListener('click', enterSanctuary);
 entryCta.addEventListener('touchend', (e) => { e.preventDefault(); enterSanctuary(); }, { passive: false });
+
+/* ---------- Breath phase label — synced to .core animation cycle ---------- */
+(function syncBreath() {
+  const phaseEl = document.querySelector('.breath-orb .phase');
+  const coreEl  = document.querySelector('.breath-orb .core');
+  if (!phaseEl || !coreEl) return;
+
+  function cycle() {
+    // Inhale 4s
+    phaseEl.style.opacity = '0';
+    setTimeout(() => {
+      phaseEl.textContent = '吸 气';
+      phaseEl.style.opacity = '1';
+    }, 300);
+
+    // Switch to exhale after 4s
+    setTimeout(() => {
+      phaseEl.style.opacity = '0';
+      setTimeout(() => {
+        phaseEl.textContent = '呼 气';
+        phaseEl.style.opacity = '1';
+      }, 300);
+    }, 4000);
+  }
+  cycle();
+  setInterval(cycle, 10000);
+})();
 
 /* ---------- Resize ---------- */
 function onResize() {
