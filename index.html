@@ -97,6 +97,21 @@
     text-shadow: 0 1px 10px rgba(20, 40, 20, 0.22);
   }
 
+  /* Right-top handle — same typography as masthead caption */
+  .ig-handle {
+    position: absolute;
+    top: calc(var(--safe-top) + 56px);
+    right: 36px;
+    font-family: var(--cn);
+    font-weight: 200;
+    font-size: 11px;
+    letter-spacing: 0.42em;
+    color: rgba(255, 255, 255, 0.46);
+    text-shadow: 0 1px 10px rgba(20, 40, 20, 0.22);
+    pointer-events: none;
+    white-space: nowrap;
+  }
+
   /* Hide deprecated controls completely */
   .legacy-hidden {
     position: absolute !important;
@@ -603,6 +618,7 @@
     }
     .masthead .cn { font-size: 12px; letter-spacing: 0.55em; margin-bottom: 22px; }
     .masthead .caption { font-size: 10px; letter-spacing: 0.42em; }
+    .ig-handle { top: calc(var(--safe-top) + 36px); right: 24px; font-size: 10px; letter-spacing: 0.42em; }
 
     /* mobile player: airy, capped at 86vw, always visible */
     .player {
@@ -625,6 +641,7 @@
   @media (max-width: 380px) {
     .masthead h1 { font-size: clamp(30px, 12vw, 38px); letter-spacing: 0.18em; }
     .masthead .caption { font-size: 9px; }
+    .ig-handle { font-size: 9px; letter-spacing: 0.36em; }
     .player {
       max-width: 92vw;
       min-width: 260px;
@@ -776,6 +793,9 @@
     <div class="cn">安 全 岛</div>
     <div class="caption">呼 吸 · 聆 听 · 放 松</div>
   </header>
+
+  <!-- TOP RIGHT — handle -->
+  <div class="ig-handle">ig：lawwwmak_</div>
 
   <!-- Breathing orb — paced like a natural human breath (~10s cycle) -->
   <div class="breath-orb" aria-hidden="true">
